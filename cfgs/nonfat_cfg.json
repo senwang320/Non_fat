@@ -1,0 +1,20 @@
+{
+    "h5_dir"        : "/data1/AEC_SharedFiles/Stanford_Data/h5s_dosenoise",
+    
+    "train_file"    : "./data/train_120kVp[CAP]_20240121_20more.xlsx",
+    "val_file"      : "./data/val_120kVp[CAP].xlsx",
+    "test_file"     : "./data/test_120kVp[CAP].xlsx",
+
+    "train_num"     : "all",
+    "val_num"       : "all",
+
+    "ft_arc"        : "resnet18",
+    "save_dir"      : "./wts_20more",
+
+    "max_epoch"     : 1000,
+
+    "protocol"      : "120kVp[CAP]",
+
+    "scouts_range"  : [0, 800]
+
+}
