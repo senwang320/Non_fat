@@ -9,12 +9,12 @@ this_cfg        = json.load(open(cfg_fname, 'r'))
 
 print(this_cfg)
 
-trainset = DirectDataset(h5_dir=this_cfg['h5_dir'], scanlist=this_cfg['train_file'], 
+trainset = DirectDataset(h5_dir=this_cfg['h5_dir'], scanlist=this_cfg['train_file'], tgtlist='./data/fat_list.xlsx',
                          casenum=this_cfg['train_num'], imsize=None, scouts_range=this_cfg['scouts_range'])
 
 
 # %%
-tx = trainset[4]
+tx = trainset[2]
 sF = tx['sF'].squeeze()
 sL = tx['sL'].squeeze()
 plt.figure()

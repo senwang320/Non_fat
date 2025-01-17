@@ -12,7 +12,7 @@ import skimage.transform as sktrans
 import pandas as pd
 
 class DirectDataset(Dataset):
-    def __init__(self, h5_dir, scanlist,
+    def __init__(self, h5_dir, scanlist, tgtlist,
                  casenum=None, imsize=None, scouts_range=[0, 800]):
         
         # load excel-like scanlist
@@ -23,6 +23,12 @@ class DirectDataset(Dataset):
                          for ii in range(len(df['Exam Number']))] 
         # dataframe for the whole set
         self.df = df
+        
+        # read fitting target from data
+        data          = pd.read_excel(tgtlist)
+        # Build a dictionary using column 0 as the keys and the rest of the row as values
+        dict_from_df  = data.set_index(data.columns[0]).to_dict(orient='index')
+        self.tgt_dict = dict_from_df
         
         self.casenum    = casenum    # num of cases used in current dataset
         if self.casenum is not None and self.casenum not in ['all']:
@@ -48,6 +54,8 @@ class DirectDataset(Dataset):
         
         f.close()
         
+        this_tgt = self.tgt_dict[scan_fn]
+        
         # preprocessing for images and emts
         sF = np.clip(sF, a_min=0, a_max=None)
         sL = np.clip(sL, a_min=0, a_max=None)
@@ -68,6 +76,9 @@ class DirectDataset(Dataset):
             'sF'        : np.expand_dims(sF, axis=0), 
             'sL'        : np.expand_dims(sL, axis=0),
             }
+        
+        # merge target into result
+        result_dict = result_dict | this_tgt
         
         return result_dict
 
