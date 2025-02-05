@@ -13,7 +13,7 @@ from utils.direct_dataset import DirectDataset
 from utils.basis_net import basis_net
 import json
 
-wts_dir     = './wts_20more/tmp/'
+wts_dir     = './wts_20more/Weight/'
 
 config_dir  = os.path.join(wts_dir, 'this_cfg.json')
 this_cfg    = json.load(open(config_dir, 'r'))
@@ -27,7 +27,7 @@ model  = basis_net(ft_arc=this_cfg['ft_arc'], n_b=1, pretrained=True)
 model.load_state_dict(wt_data['weights'])
 model.eval()
 
-valset   = DirectDataset(h5_dir=this_cfg['h5_dir'], scanlist=this_cfg['test_file'], tgtlist='./data/fat_list.xlsx',
+valset   = DirectDataset(h5_dir=this_cfg['h5_dir'], scanlist=this_cfg['test_file'], tgtlist='./data/nonfat_reference.xlsx',
                          casenum=this_cfg['test_num'], imsize=None, scouts_range=this_cfg['scouts_range'])
 
 device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
@@ -39,22 +39,27 @@ model.to(device)
 
 #%%
 
-NORMKG    = 30
-
+NORMX    = this_cfg['NORMX']
+outdata  = []
 for bb, batch in enumerate(val_loader):
     
     # batch, nBPs = batch
     scanNs, sF, sL = batch['scan_fn'], batch['sF'], batch['sL']
-    refs           = batch['subcutaneous_fat'].float()
+    refs           = batch['Weight'].float()
 
     # imgs
     sF, sL  = sF.to(device), sL.to(device)
     # refs    = refs.to(device)/NORMKG
 
-    scan_fn     = batch['scan_fn']
+    scan_fn     = batch['scan_fn'][0]
 
     x = model(sF, sL).squeeze()
-    print('{}/{}, {}...'.format(bb, len(val_loader), batch['scan_fn']), 'REF={:.2f} kg'.format(refs.squeeze().numpy()), 'PRED={:.2f} kg'.format(x.detach().cpu().numpy()*NORMKG))
+    print('{}/{}, {}...'.format(bb, len(val_loader), batch['scan_fn']), 'REF={:.2f} kg'.format(refs.squeeze().numpy()), 'PRED={:.2f} kg'.format(x.detach().cpu().numpy()*NORMX))
     
+    outdata.append([scan_fn, refs.squeeze().item(), x.detach().cpu().numpy()*NORMX])
     # out_fname = os.path.join(nn_para_save_dir, '{}_nn_{}.mat'.format(scan_fn[0], fixed_emt))
     # sio.savemat(out_fname, {'x':para_nn.detach().cpu().numpy().squeeze()})
+# %%
+for ii in range(len(outdata)):
+    print(outdata[ii][0], outdata[ii][1], outdata[ii][2])
+# %%

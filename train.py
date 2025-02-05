@@ -30,20 +30,15 @@ n_epoch  = 1000
 
 print(this_cfg)
 
-trainset = DirectDataset(h5_dir=this_cfg['h5_dir'], scanlist=this_cfg['train_file'], tgtlist='./data/fat_list.xlsx',
+trainset = DirectDataset(h5_dir=this_cfg['h5_dir'], scanlist=this_cfg['train_file'], tgtlist='./data/nonfat_reference.xlsx',
                          casenum=this_cfg['train_num'], imsize=None, scouts_range=this_cfg['scouts_range'])
 
-valset   = DirectDataset(h5_dir=this_cfg['h5_dir'], scanlist=this_cfg['val_file'], tgtlist='./data/fat_list.xlsx',
+valset   = DirectDataset(h5_dir=this_cfg['h5_dir'], scanlist=this_cfg['val_file'], tgtlist='./data/nonfat_reference.xlsx',
                          casenum=this_cfg['val_num'], imsize=None, scouts_range=this_cfg['scouts_range'])
 
-# trainset = DirectDataset(h5_dir=this_cfg['h5_dir'], scanlist=this_cfg['train_file'], tgtlist='./data/fat_list.xlsx',
-#                          casenum=4, imsize=None, scouts_range=this_cfg['scouts_range'])
-
-# valset   = DirectDataset(h5_dir=this_cfg['h5_dir'], scanlist=this_cfg['val_file'], tgtlist='./data/fat_list.xlsx',
-#                          casenum=4, imsize=None, scouts_range=this_cfg['scouts_range'])
-
 # init writer of tensorboard
-this_cfg['basename'] = 'tmp'
+tgt = 'torso_wt'
+this_cfg['basename'] = tgt
 logdir = os.path.join("runs", this_cfg['basename'])
 writer = SummaryWriter(logdir)
 
@@ -82,7 +77,8 @@ best_model_params_path = os.path.join(result_dir, 'model_bestval.pt')
 
 
 best_val  = 1e9
-NORMKG    = 30
+NORMX     = 30
+this_cfg['NORMX'] = NORMX
 
 for epoch in range(n_epoch):
 
@@ -101,11 +97,11 @@ for epoch in range(n_epoch):
             
             # batch, nBPs = batch
             scanNs, sF, sL = batch['scan_fn'], batch['sF'], batch['sL']
-            refs           = batch['subcutaneous_fat'].float()
+            refs           = batch[tgt].float()
             
             # imgs
             sF, sL  = sF.to(device), sL.to(device)
-            refs    = refs.to(device)/NORMKG
+            refs    = refs.to(device)/NORMX
             
             optimizer.zero_grad()
             
