@@ -50,8 +50,8 @@ class basis_net(nn.Module):
     def __init__(self, ft_arc='resnet34', pretrained=True, n_b=2):
         super().__init__()
 
-        self.ft_net1 = build_ft_net(ft_arc, pretrained)
-        self.ft_net2 = build_ft_net(ft_arc, pretrained)
+        self.ft_net1 = build_ft_net(ft_arc, pretrained=pretrained)
+        self.ft_net2 = build_ft_net(ft_arc, pretrained=pretrained)
         
         if ft_arc in ['resnet18', 'resnet34']:
             s_ft = 512
